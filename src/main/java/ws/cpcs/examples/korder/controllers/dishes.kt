@@ -26,6 +26,21 @@ class OrderController
 
     fun notFound(msg: String) = ResponseEntity.status(404).body(msg)
 
+    interface OrderSummary {
+        val id: Long
+        val users: Set<String>
+        val amount: Double
+    }
+
+    @GetMapping fun list(@PageableDefault(10) page: Pageable): Page<OrderSummary> =
+            orderRepo.findAll(page).map {
+                object : OrderSummary {
+                    override val id = it.id
+                    override val users = it.reservations.groupBy { it.username }.keys
+                    override val amount = it.reservations.sumByDouble { it.amount * it.dish!!.price }
+                }
+            }
+
     @PostMapping fun create(@RequestParam code: String) = orderRepo.save(Order(code)).let {
         ResponseEntity.created(URI("/api/orders/${it.id}")).body(it)
     }

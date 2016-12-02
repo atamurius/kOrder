@@ -47,7 +47,7 @@ interface ReservationRepo : JpaRepository<Reservation, Long> {
 )
 class Order(
         var code: String = "",
-        @OneToMany(mappedBy = "order") var reservations: Set<Reservation> = emptySet()) : WithId()
+        @OneToMany(mappedBy = "order", fetch = FetchType.LAZY) var reservations: Set<Reservation> = emptySet()) : WithId()
 
 interface OrderRepo : JpaRepository<Order, Long> {
     @EntityGraph(value = "Order.withReservations", type = EntityGraph.EntityGraphType.LOAD)
